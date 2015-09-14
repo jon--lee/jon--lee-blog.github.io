@@ -1,0 +1,28 @@
+# Theme customization - please change from the defaults!
+
+# Color for top bar, links, etc
+highlight_color: '#3498db'
+
+# Profile links on the left sidebar, leave blank to ignore
+social:
+  github: jon--lee
+  #bitbucket: philipj
+  #hacker_news:
+  #stackexchange: 348619
+  #stackoverflow: 348619
+  #facebook: zuck
+  #tumblr: animalygifs
+  linkedin: jlee28
+  #gplus: 110552447039675960964
+  #gravatar: 86e6ff8f75f9daef42d53b7f8002fd95
+
+# "Hi, I'm _______"
+name: Jonathan Lee
+email: jonathan_lee@berkeley.edu
+tagline: ""
+
+# Google Analytics key, leave blank to ignore
+google_analytics_key: UA-xxxx-x
+
+# Toggle "Postings are my own" disclaimer in footer
+show_disclaimer: true

@@ -1,0 +1,23 @@
+<nav>
+  <h1></h1>
+  <a href="/">
+    {% if site.data.theme.social.gravatar %}
+    <img src="http://www.gravatar.com/avatar/{{ site.data.theme.social.gravatar }}?s=200" id="gravatar" alt="My photo"/>
+    {% else %}
+    <img src="/logo.png" id="logo" width='150' height='150' alt="Blog logo"/>
+    {% endif %}
+  </a>
+  <h2><a href="/">{{ site.data.theme.name }}</a><D-r></h2>
+  <div id="bio">
+    <p>Hey, nice to meet you!</p>
+    <p><a href='http://www.JonathanNLee.com/'>About me</a></p>    
+    <p>Check out my latest project <a href='https://jon--lee.github.io/neuralpy'>neuralpy!</a></p>
+    <p>
+    <code>jonathan_lee AT berkeley DOT edu</code>
+    </p>
+    </p>
+  </div>
+  <div id="social">
+    {% include social.html %}
+  </div>
+</nav>
