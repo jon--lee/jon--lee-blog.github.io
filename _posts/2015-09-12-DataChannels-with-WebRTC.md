@@ -174,7 +174,8 @@ For now it's nothing fancy.
 If you open this raw HTML file, you'll find a header and three buttons. Essentially what will happen here is that
 when the user clicks the "Ready" button, they'll make their presence noticed by the server. When we have two
 peers who are noticed by the server, the server will enable either to click "Connect," which will establish the data
-channel. Then a peer can click "Send Data," which will send some text over to the other peer.
+channel. Then a peer can click "Send Data," which will send some text over to the other peer. "Connect" and "Send Data" are
+disabled for now since the peer will go through stages to establish a data channel.
 
 We want this to be running from Express, so we should probably set that up now. Open up `index.js`
 and add the following lines of code.
@@ -223,7 +224,7 @@ $ node index.js
 You should see a printed statement that says `running on http://localhost:5000`.
 Now if you point your browser to `http://localhost:5000/`, you should see that same HTML page. Nice!
 
-# User Interface Functionality
+# User interface functionality
 
 If you tried to click those buttons, you would realize that they don't do anything. Let's
 give this some functionaliy. Just as Phil Nash did in his guide, we will create a Channel object
@@ -254,8 +255,90 @@ Channel.sendButton = document.getElementById('send-data');
 Channel.sendButton.addEventListener('click', Channel.sendData, false);
 {% endhighlight %}
 
+If you load the page again, and click the ready button, you should see that little message
+in the console. You can verify that the other buttons are also working by taking out the `disabled`
+attribute and reloading the page.
+
+# Communicating with the server
+
+Displaying a message in the console isn't all that exciting. We really want the ready button
+to notify the server that this peer is present and ready to set up a a data channel. This process
+can be broken down into three tasks:
+
+- Send a ready message to the server over a socket.
+- Get a notification that the server recognizes us.
+- Get a notification that the other peer is ready and recognized as well.
+
+Step 1 will be handled on the client side. We just need to add the following code to connect
+and cause the server to fire an event when we're ready. This means that we need to call `io()` which
+connects over websockets to the server. Then we `emit` a message to join a "room." Don't worry too much
+if you're not familiar with how Socket.io works. You can think of it as the client joining a chat room 
+called "room" and now the client can send messages to room; however, in our case, these messages will be received
+by the server and the server will fire event handlers on reception.
 
 {% highlight javascript %}
+// public/app.js
+var Channel = {
+    socket: io(),
+    ...
+    getReady: function(){
+        Channel.socket.emit('join', 'room');       
+    },
+    ...
+}
 {% endhighlight %}
+
+Let's head back over to the server so we can receive this message.
+
 {% highlight javascript %}
+// index.js
+...
+io.on('connection', function(socket){
+    socket.on('join', function(room){
+        
+    });    
+});
 {% endhighlight %}
+
+The new lines are basically the receptors of the message. When we called `io()` we fired the first line `io.on('connection'...);`
+which sets us up for handling receptions of subsequent messages.
+
+The second line defines our handler for a 'join' message, which is what we are sending in the 
+`getReady` function. `join` has a parameter `room` which is just the name of the room that I talked
+about earlier. You may want to use different room names if you have lots of users.
+
+{% highlight javascript %}
+// index.js
+...
+io.on('connection', function(socket){
+    socket.on('join', function(room){
+        var clients = io.sockets.adapter.rooms[room];
+        var numClients = (typeof clients !== 'undefined') ? Object.keys(clients).length : 0;
+        if (numClients == 0){
+            socket.join(room);
+            socket.emit('join', room);
+        }
+        else if (numClients == 1) {
+            socket.join(room);
+            socket.emit('join', room);
+            socket.emit('ready', room);
+            socket.broadcast.emit('ready', room);
+        }
+        else {
+            socket.emit('full', room);
+        }
+    });    
+});
+{% endhighlight %}
+
+Whoa! A lot happened right there! This is drawn straight from Phil Nash's article.
+I don't really want to go too into the weeds here, but the gist is that we're
+getting the number of clients connected to `room`. If there no one else is in the room,
+we have to wait for the other peer, but we can notify the client that we've connected
+successfully. If there is another client in the room, we can tell the new client that they've
+joined and we can tell both clients that we're ready for the next phase.
+
+If there are already two clients there, then we want to let the new client know that
+the room is filled :(
+
+

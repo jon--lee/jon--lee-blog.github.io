@@ -17,12 +17,12 @@ social:
   #gravatar: 86e6ff8f75f9daef42d53b7f8002fd95
 
 # "Hi, I'm _______"
-name: Jonathan Lee
+name: Jonathan N. Lee
 email: jonathan_lee@berkeley.edu
 tagline: ""
 
 # Google Analytics key, leave blank to ignore
-google_analytics_key: UA-xxxx-x
+google_analytics_key: UA-67764032-1
 
 # Toggle "Postings are my own" disclaimer in footer
 show_disclaimer: true
