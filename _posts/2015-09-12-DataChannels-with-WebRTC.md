@@ -259,10 +259,10 @@ If you load the page again, and click the ready button, you should see that litt
 in the console. You can verify that the other buttons are also working by taking out the `disabled`
 attribute and reloading the page.
 
-# Communicating with the server
+# Sending messages to the server
 
 Displaying a message in the console isn't all that exciting. We really want the ready button
-to notify the server that this peer is present and ready to set up a a data channel. This process
+to notify the server that this peer is present and ready to set up a data channel. This process
 can be broken down into three tasks:
 
 - Send a ready message to the server over a socket.
@@ -274,7 +274,7 @@ and cause the server to fire an event when we're ready. This means that we need 
 connects over websockets to the server. Then we `emit` a message to join a "room." Don't worry too much
 if you're not familiar with how Socket.io works. You can think of it as the client joining a chat room 
 called "room" and now the client can send messages to room; however, in our case, these messages will be received
-by the server and the server will fire event handlers on reception.
+by the server and the server will fire event handlers upon reception and send messages back.
 
 {% highlight javascript %}
 // public/app.js
@@ -285,7 +285,8 @@ var Channel = {
         Channel.socket.emit('join', 'room');       
     },
     ...
-}
+};
+...
 {% endhighlight %}
 
 Let's head back over to the server so we can receive this message.
@@ -295,12 +296,12 @@ Let's head back over to the server so we can receive this message.
 ...
 io.on('connection', function(socket){
     socket.on('join', function(room){
-        
+        // It's empty now. We'll implement it in just a second.
     });    
 });
 {% endhighlight %}
 
-The new lines are basically the receptors of the message. When we called `io()` we fired the first line `io.on('connection'...);`
+The new lines are basically the receptors of the message. When we called `io()` on the client side we fired the first line `io.on('connection'...);`
 which sets us up for handling receptions of subsequent messages.
 
 The second line defines our handler for a 'join' message, which is what we are sending in the 
@@ -340,5 +341,97 @@ joined and we can tell both clients that we're ready for the next phase.
 
 If there are already two clients there, then we want to let the new client know that
 the room is filled :(
+
+# Receiving messages on the client side
+
+I mentioned that the server is going to send messages back to the client. The client needs some
+functionality to handle those messages. But first we need to tell the client what kinds
+of messages we're expecting. Remember that the server could send back `'join'`, `'ready'` or `'full'`.
+Just before we emit to the server, we should add handlers to the socket.
+
+{% highlight javascript %}
+// public/app.js
+var Channel = {
+    ...
+    getReady: function(){
+        Channel.socket.on('join', Channel.onJoin);
+        Channel.socket.on('ready', Channel.onReady);
+        Channel.socket.on('full', Channel.onFull);
+        Channel.socket.emit('join', 'room');
+    },
+    ...
+};
+...
+{% endhighlight %}
+
+Of course, we have to implement `onJoin`, `onReady`, and `onFull`. For now we will just spit some output
+to the console to ensure that everything is working.
+
+{% highlight javascript %}
+// public/app.js
+var Channel = {
+    ...
+    onJoin: function(){
+        console.log('server says we have joined!');
+    },
+    onReady: function(){
+        console.log('server says it is ready!');
+    },
+    onFull: function(){
+        console.log('boo :( room is full');
+    }
+};
+...
+{% endhighlight %}
+
+Restart your server and point your browser to the localhost. If you click the ready button
+you should see a message in your browser console that says it has joined.
+
+While keeping this tab open, open a new tab and point it to the same localhost. Click the ready
+button again and you should see an additional message in each tab's console that says the server
+is ready.
+
+If you open a third tab and do the same, the message should say that the room is full.
+
+Below is a screenshot showing the ready message:
+
+![Ready example](/ready.png)
+
+And one showing the full message:
+
+![Full example](/full.png)
+
+### [Checkpoint 1](https://github.com/jon--lee/webrtc-datachannel-post/tree/3d250cc8dfd35dadf6b48331496220e23a9c3a0d)
+Just to ensure that you are on the right track, I posted a [checkpoint on github](https://github.com/jon--lee/webrtc-datachannel-post/tree/3d250cc8dfd35dadf6b48331496220e23a9c3a0d).
+It contains the source code up to this point in case you are stuck.
+
+We want to disable the option of clicking "Ready" again and enable the option of clicking
+"Connect" when the server is ready. Replace the console messages with the following:
+
+{% highlight javascript %}
+// public/app.js
+var Channel = {
+    ...
+    onJoin: function(){
+        Channel.readyButton.setAttribute('disabled', 'disabled');        
+    },
+    onReady: function(){
+        Channel.connectButton.removeAttribute('disabled');
+    },
+    ...
+};
+...
+{% endhighlight %}
+
+
+
+
+
+{% highlight javascript %}
+{% endhighlight %}
+{% highlight javascript %}
+{% endhighlight %}
+{% highlight javascript %}
+{% endhighlight %}
 
 
