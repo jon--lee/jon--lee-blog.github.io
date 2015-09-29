@@ -46,8 +46,7 @@ By the end of this tutorial we will have:
 
 You may have noticed the word "websockets" and wondered why we need websockets when we can just use WebRTC.
 One thing that you should keep in mind is that we actually do need servers to facilitate WebRTC.
-For example, **presence detection** and **signalling** both involve sending information
-between to and from a server before we can establish our peer connection and data channel. Websockets tend
+For example, **presence detection** and **signalling** both involve sending information to and from a server before we can establish our peer connection and data channel. Websockets tend
 to be pretty straightforward for these tasks.
 
 Again I'd just like to note that I borrow a lot from [Phil Nash's Twilio Blog post](https://www.twilio.com/blog/2014/12/set-phasers-to-stunturn-getting-started-with-webrtc-using-node-js-socket-io-and-twilios-nat-traversal-service.html), 
@@ -65,7 +64,7 @@ You can use other application frameworks and communication channels, but I find 
 
 ## Set up
 
-Make a new directory called "channels" and and initialize a Node application there. Fill out the information for which `npm init` prompts.
+Make a new directory called "channels" and initialize a Node application there. Fill out the information for which `npm init` prompts.
 If you don't know the answers to some prompts, just press enter. It doesn't really matter.
 
 {% highlight bash %}
@@ -97,7 +96,7 @@ $ npm install express socket.io --save
 {% endhighlight %}
 
 You'll see a directory called `node_modules` which contains the dependencies
-and if you look in `package.json` you should now see an addition `dependencies` element.
+and if you look in `package.json` you should now see an additional `dependencies` element.
 
 {% highlight json %}
 {
@@ -109,8 +108,8 @@ and if you look in `package.json` you should now see an addition `dependencies` 
 }
 {% endhighlight %}
 
-Let's make some files in our application. We'll start with the backend. Remember how you're `package.json`
-has `"main": "index.js"`? Now we have to make that file.
+Let's make some files in our application. Remember how you're `package.json`
+has `"main": "index.js"`? We actually have to make that file (npm won't do it for us).
 
 {% highlight bash %}
 $ touch index.js
@@ -124,7 +123,7 @@ $ cd public
 $ touch app.js index.html
 {% endhighlight %}
 
-We'll also need an `adapter.js`, which is a ["shim to insulate apps from spec changes and prefix differences"](https://github.com/webrtc/adapter)
+We'll also need an `adapter.js`, which is a ["shim to insulate apps from spec changes and prefix differences."](https://github.com/webrtc/adapter)
 You can get the file by running
 
 {% highlight bash %}
@@ -227,7 +226,7 @@ Now if you point your browser to `http://localhost:5000/`, you should see that s
 # User interface functionality
 
 If you tried to click those buttons, you would realize that they don't do anything. Let's
-give this some functionaliy. Just as Phil Nash did in his guide, we will create a Channel object
+give them some functionaliy. Just as Phil Nash did in his guide, we will create a Channel object
 inside `public/app.js` that will act as a comprehensive collection of functions and variables. We'll 
 add our buttons to that object and give them some event listeners, which will correspond to functions
 already in the object
@@ -334,7 +333,7 @@ io.on('connection', function(socket){
 
 Whoa! A lot happened right there! This is drawn straight from Phil Nash's article.
 I don't really want to go too into the weeds here, but the gist is that we're
-getting the number of clients connected to `room`. If there no one else is in the room,
+getting the number of clients connected to `room`. If no one else is in the room,
 we have to wait for the other peer, but we can notify the client that we've connected
 successfully. If there is another client in the room, we can tell the new client that they've
 joined and we can tell both clients that we're ready for the next phase.
@@ -471,6 +470,7 @@ var Channel = {
 `handlePeerConnection` creates a new RTCPeerConnection instance and we pass it handlers for the ICE candidate and the datachannel.
 
 There are three referenced functions here that we have not implemented:
+
 -   `onIceCandidate`
 -   `onCandidate`
 -   `createOffer`
@@ -515,7 +515,7 @@ And we have already created the `onCandidate` handler on the client side which p
 it to the peer connection.
 
 Now we must share more configuration information via an "offer." This process is similar to what we just did, except this time, we will actually create the datachannel.
-Add two new functions `createOffer` and `receiveChannelCallback`.
+Add a new function `createOffer`.
 
 {% highlight javascript %}
 // public/app.js
@@ -618,11 +618,11 @@ var Channel = {
 
 We're almost done! Finally we get to move on to the fun stuff!
 
-Recall that we still have two functions which have not yet been implemented: `createDataChannel`, which was called in `createOffer` and `receiveChannelCallback`, which was referenced in `handlePeerConnection`.
+Recall that we still have two functions which have not yet been implemented: `createDataChannel`, which was called in `createOffer`, and `receiveChannelCallback`, which was referenced in `handlePeerConnection`.
 
 Here's the breakdown of the two:
 
-- `createDataChannel` will establish our datachannel connection between the peers and specificy the protocol for handling events, such as opening and closing.
+- `createDataChannel` will establish our datachannel connection between the peers and specify the protocol for handling events, such as opening and closing.
 - `receiveChannelCallback` will complement `createDataChannel` by firing when the other peer calls datachannel events.
 
 {% highlight javascript %}
